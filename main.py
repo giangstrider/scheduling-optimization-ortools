@@ -78,3 +78,20 @@ for j in jobs:
                 start=start_var, end=end_var, interval=optional_interval_var,
                 duration=duration, bool_var=bool_var
             )
+
+# Model BLOCKING_TIMES
+for b in blocked_times:
+    for e in employees:
+        if b['employee_id'] == e['employee_id']:
+            label_blocked = b['blocked_id']
+            start_var = model.NewIntVar(0, horizon, 'start_block_%s' % label_blocked)
+            duration = b['activity_duration']
+            end_var = model.NewIntVar(0, horizon, 'end_block_%s' % label_blocked)
+            bool_var = model.NewBoolVar('bool_block_%s' % label_blocked)
+            interval_var = model.NewIntervalVar(
+                start_var, duration, end_var, 'interval_block_%s' % label_blocked
+            )
+
+            all_bookings[label_blocked] = block_type(
+                start=start_var, end=end_var, interval=interval_var, duration=duration
+            )            
