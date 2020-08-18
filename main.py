@@ -39,7 +39,9 @@ for b in blocked_times:
 ### CONSTRUCT LOCATIONS OBJECTS ###
 locations_dict = {}
 for l in locations:
-    locations_dict[l['employee_id']] = l['employee_id']
+    locations_dict[l['location_id']] = l['employee_id']
+
+print(locations_dict)   
 
 ### CONSTRUCT DISTANCES OBJECTS ###
 total_distance_between_matrix = 0
@@ -85,7 +87,7 @@ for b in blocked_times:
         if b['employee_id'] == e['employee_id']:
             label_blocked = b['blocked_id']
             start_var = model.NewIntVar(0, horizon, 'start_block_%s' % label_blocked)
-            duration = b['activity_duration']
+            duration = b['job_duration']
             end_var = model.NewIntVar(0, horizon, 'end_block_%s' % label_blocked)
             bool_var = model.NewBoolVar('bool_block_%s' % label_blocked)
             interval_var = model.NewIntervalVar(
@@ -155,9 +157,9 @@ for j in jobs:
     model.Add(sum(bool_jobs) == 1)
 
     # Model load balancing objective
-    diff_var = model.NewIntVar(-avg_jobs_of_employees, max_diff_balancing_integer, 'diff_with_avg_%s' % a['job_id'])
+    diff_var = model.NewIntVar(-avg_jobs_of_employees, max_diff_balancing_integer, 'diff_with_avg_%s' % j['job_id'])
     model.Add(diff_var == sum(bool_jobs) - avg_jobs_of_employees)
-    abs_diff_of_balancing_var = model.NewIntVar(0, max_diff_balancing_integer, 'abs_diff_with_avg_%s' % a['job_id'])
+    abs_diff_of_balancing_var = model.NewIntVar(0, max_diff_balancing_integer, 'abs_diff_with_avg_%s' % j['job_id'])
     model.AddAbsEquality(abs_diff_of_balancing_var, diff_var)
     diff_of_vector_balancing.append(abs_diff_of_balancing_var)
 
