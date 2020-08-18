@@ -13,7 +13,7 @@ with open('sample.json') as f:
 jobs = data['jobs']
 blocked_times = data['blocked_times']
 employees = data['employees']
-factories = data['location']
+locations = data['locations']
 distances = data['distances']
 
 ### LOGGING SIZE OF DATA TO MEASURE PERFORMANCE ###
@@ -36,3 +36,6 @@ for b in blocked_times:
     b['origin_requested_date'] = b['requested_date']
     b['requested_date'] = get_weekday_from_datetime(b['requested_date'])       
 
+locations_dict = {}
+for l in locations:
+    locations_dict[l['factory_customer_id']] = l['employee_id']
