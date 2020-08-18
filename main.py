@@ -160,3 +160,5 @@ for j in jobs:
     abs_diff_of_balancing_var = model.NewIntVar(0, max_diff_balancing_integer, 'abs_diff_with_avg_%s' % a['job_id'])
     model.AddAbsEquality(abs_diff_of_balancing_var, diff_var)
     diff_of_vector_balancing.append(abs_diff_of_balancing_var)
+
+model.AddMaxEquality(max_diff_balancing_var, diff_of_vector_balancing)
