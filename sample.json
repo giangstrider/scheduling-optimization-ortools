@@ -1,0 +1,280 @@
+{
+    "employees": [
+       {
+          "employee_id": "0230509700",
+          "name": "Ingrid Barrios",
+          "skills": [
+             "A",
+             "B",
+             "D"
+          ],
+          "specialized": [
+             "SpecificSkills"
+          ]
+       },
+       {
+          "employee_id": "7222247981",
+          "name": "Oscar Coronado",
+          "skills": [
+             "FA",
+             "A",
+             "B",
+             "D"
+          ],
+          "specialized": [
+             "SpecificSkills"
+          ]
+       },
+       {
+          "employee_id": "8875727446",
+          "name": "Nestor Mejia",
+          "skills": [
+             "FA",
+             "TPR",
+             "B",
+             "D"
+          ],
+          "specialized": [
+             "SpecificSkills"
+          ]
+       },
+       {
+          "employee_id": "6117206298",
+          "name": "Marco Trujillo",
+          "skills": [
+             "FA",
+             "A",
+             "B",
+             "D"
+          ],
+          "specialized": [
+             "SpecificSkills"
+          ]
+       }
+    ],
+    "locations": [
+       {
+          "location_id": "79558",
+          "employee_id": ""
+       },
+       {
+          "location_id": "20865",
+          "employee_id": ""
+       },
+       {
+          "location_id": "03749",
+          "employee_id": "8875727446"
+       },
+       {
+          "location_id": "39485",
+          "employee_id": ""
+       },
+       {
+          "location_id": "90706",
+          "employee_id": "8875727446"
+       }
+    ],
+    "jobs": [
+       {
+          "job_duration": 3,
+          "job_type": "D",
+          "job_id": "x7f4bzqP",
+          "expected_date": "2019-04-08",
+          "location_id": "79558",
+          "shipment_date": "2019-04-30"
+       },
+       {
+          "job_duration": 3,
+          "job_type": "D",
+          "job_id": "SZntYmCs",
+          "expected_date": "2019-04-08",
+          "location_id": "79558",
+          "shipment_date": "2019-04-30"
+       },
+       {
+          "job_duration": 3,
+          "job_type": "D",
+          "job_id": "mefZUjzH",
+          "expected_date": "2019-04-08",
+          "location_id": "79558",
+          "shipment_date": "2019-04-30"
+       },
+       {
+          "job_duration": 3,
+          "job_type": "D",
+          "job_id": "U2R8oIWr",
+          "expected_date": "2019-04-08",
+          "location_id": "79558",
+          "shipment_date": "2019-04-30"
+       },
+       {
+        "job_duration": 3,
+        "job_type": "D",
+        "job_id": "pPjY3lwB",
+        "expected_date": "2019-04-08",
+        "location_id": "79558",
+        "shipment_date": "2019-04-30"
+     }
+    ],
+    "distances": [
+       {
+          "hours": 1,
+          "measure_point": "39485",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 1,
+          "measure_point": "39485",
+          "reference_point": "20865"
+       },
+       {
+          "hours": 1,
+          "measure_point": "20865",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 1,
+          "measure_point": "6117206298",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 1,
+          "measure_point": "6117206298",
+          "reference_point": "20865"
+       },
+       {
+          "hours": 1,
+          "measure_point": "6117206298",
+          "reference_point": "39485"
+       },
+       {
+          "hours": 1,
+          "measure_point": "0230509700",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 1,
+          "measure_point": "0230509700",
+          "reference_point": "20865"
+       },
+       {
+          "hours": 1,
+          "measure_point": "0230509700",
+          "reference_point": "39485"
+       },
+       {
+          "hours": 1,
+          "measure_point": "7222247981",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 1,
+          "measure_point": "7222247981",
+          "reference_point": "20865"
+       },
+       {
+          "hours": 1,
+          "measure_point": "7222247981",
+          "reference_point": "39485"
+       },
+       {
+          "hours": 13,
+          "measure_point": "39485",
+          "reference_point": "90706"
+       },
+       {
+          "hours": 13,
+          "measure_point": "39485",
+          "reference_point": "03749"
+       },
+       {
+          "hours": 13,
+          "measure_point": "03749",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 13,
+          "measure_point": "03749",
+          "reference_point": "20865"
+       },
+       {
+          "hours": 1,
+          "measure_point": "03749",
+          "reference_point": "90706"
+       },
+       {
+          "hours": 13,
+          "measure_point": "90706",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 13,
+          "measure_point": "90706",
+          "reference_point": "20865"
+       },
+       {
+          "hours": 13,
+          "measure_point": "6117206298",
+          "reference_point": "90706"
+       },
+       {
+          "hours": 13,
+          "measure_point": "6117206298",
+          "reference_point": "03749"
+       },
+       {
+          "hours": 13,
+          "measure_point": "0230509700",
+          "reference_point": "90706"
+       },
+       {
+          "hours": 13,
+          "measure_point": "0230509700",
+          "reference_point": "03749"
+       },
+       {
+          "hours": 13,
+          "measure_point": "7222247981",
+          "reference_point": "90706"
+       },
+       {
+          "hours": 13,
+          "measure_point": "7222247981",
+          "reference_point": "03749"
+       },
+       {
+          "hours": 13,
+          "measure_point": "8875727446",
+          "reference_point": "79558"
+       },
+       {
+          "hours": 13,
+          "measure_point": "8875727446",
+          "reference_point": "20865"
+       },
+       {
+          "hours": 1,
+          "measure_point": "8875727446",
+          "reference_point": "90706"
+       },
+       {
+          "hours": 1,
+          "measure_point": "8875727446",
+          "reference_point": "03749"
+       },
+       {
+          "hours": 13,
+          "measure_point": "8875727446",
+          "reference_point": "39485"
+       }
+    ],
+    "blocked_times": [
+        {
+            "job_type": "Meeting",
+            "job_duration": 3,
+            "employee_id": "7222247981",
+            "requested_date": "2018-04-09",
+            "blocked_id": "wonoXGV5"
+        }
+    ]
+ }
