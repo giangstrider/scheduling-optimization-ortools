@@ -12,3 +12,9 @@ blocked_times = data['blocked_times']
 employees = data['employees']
 factories = data['location']
 distances = data['distances']
+
+### LOGGING SIZE OF DATA TO MEASURE PERFORMANCE ###
+print("ASSIGNMENTS ", len(jobs))
+print("BLOCKED_TIMES ", len(blocked_times))
+print("INSPECTORS ", len(employees))
+print("HORIZON ", horizon)
