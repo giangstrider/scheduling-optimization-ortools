@@ -36,10 +36,12 @@ for b in blocked_times:
     b['origin_requested_date'] = b['requested_date']
     b['requested_date'] = get_weekday_from_datetime(b['requested_date'])       
 
+### CONSTRUCT LOCATIONS OBJECTS ###
 locations_dict = {}
 for l in locations:
     locations_dict[l['factory_customer_id']] = l['employee_id']
 
+### CONSTRUCT DISTANCES OBJECTS ###
 total_distance_between_matrix = 0
 distances_dict = {}
 for distance_obj in distances:
