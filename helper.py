@@ -26,3 +26,8 @@ def get_distance_between_point(distances_dict, measure_point, reference_point):
         key_tuple = (reference_point, measure_point)
     hours = distances_dict[key_tuple]
     return hours
+
+def get_bound_of_weekday(hours_per_day_model, weekday, hour_from, hour_to):
+    start_bound = weekday * hours_per_day_model + hour_from
+    end_bound = start_bound + hour_to - hour_from
+    return start_bound, end_bound

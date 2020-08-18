@@ -5,7 +5,7 @@ import json
 import math
 
 from config import horizon, weekdays_int, HOURS_PER_DAY_MODEL
-from helper import get_weekday_from_datetime, get_distance_between_point
+from helper import get_weekday_from_datetime, get_distance_between_point, get_bound_of_weekday
 
 with open('sample.json') as f:
     data = json.load(f)
@@ -19,18 +19,18 @@ distances = data['distances']
 ### LOGGING SIZE OF DATA TO MEASURE PERFORMANCE ###
 print("ASSIGNMENTS ", len(jobs))
 print("BLOCKED_TIMES ", len(blocked_times))
-print("INSPECTORS ", len(employees))
+print("EMPLOYEES ", len(employees))
 print("HORIZON ", horizon)
 
 
 ### TRANSFORM DATE OF JOB & BLOCKING_TIMES TO INTEGER ###
-for a in jobs:
-    a['origin_expected_date'] = a['expected_date']
-    a['expected_date'] = get_weekday_from_datetime(a['expected_date'])
-    if not a['shipment_date']:
-        a['shipment_date'] = -1
+for j in jobs:
+    j['origin_expected_date'] = j['expected_date']
+    j['expected_date'] = get_weekday_from_datetime(j['expected_date'])
+    if not j['shipment_date']:
+        j['shipment_date'] = -1
     else:
-        a['shipment_date'] = get_weekday_from_datetime(a['shipment_date'])
+        j['shipment_date'] = get_weekday_from_datetime(j['shipment_date'])
 
 for b in blocked_times:
     b['origin_requested_date'] = b['requested_date']
@@ -143,7 +143,7 @@ diff_of_vector_balancing = []
 avg_jobs_of_employees = int(len(jobs) / len(employees))
 max_diff_balancing_integer = len(jobs) - avg_jobs_of_employees
 max_diff_balancing_var = model.NewIntVar(0, max_diff_balancing_integer, 'max_diff_balancing')
-bools_factory_mapping = []
+bools_location_mapping = []
 for j in jobs:
     bool_jobs = []
     for e in employees:
@@ -151,7 +151,7 @@ for j in jobs:
             label_tuple = (j['job_id'], e['employee_id'])
             bool_jobs.append(all_bookings[label_tuple].bool_var)
             if locations_dict[j['location_id']] == e['employee_id']:
-                bools_factory_mapping.append(all_bookings[label_tuple].bool_var.Not())
+                bools_location_mapping.append(all_bookings[label_tuple].bool_var.Not())
     model.Add(sum(bool_jobs) == 1)
 
     # Model load balancing objective
@@ -162,3 +162,125 @@ for j in jobs:
     diff_of_vector_balancing.append(abs_diff_of_balancing_var)
 
 model.AddMaxEquality(max_diff_balancing_var, diff_of_vector_balancing)
+
+
+# Model date change
+abs_integer_dates_distance = []
+# Travel time objective
+switch_transit_literals = []
+switch_transition_times = []
+# Distance objective
+total_avg_distances = 0
+for e in employees:
+    intervals = []
+    executor_starts = []
+    executor_ends = []
+    executor_bools = []
+    executor_intervals = []
+    location_ids_mapping = []
+
+    distance_i_to_fs = 0
+    # NoOverLap contraint for assignments
+    for j in jobs:
+        if j['job_type'] in e['skills'] or 'General' in e['skills']:
+            label_tuple = (j['job_id'], e['employee_id'])
+            booking = all_bookings[label_tuple]
+
+            # Add to list for NoOverlap constraint
+            intervals.append(booking.interval)
+            # Add to executor node for dense graph
+            executor_intervals.append(booking.interval)
+
+            # Add to executor node for dense graph distance reference
+            executor_starts.append(booking.start)
+            executor_ends.append(booking.end)
+
+            # Add to executor bool for dense graph node reference
+            executor_bools.append(booking.bool_var)
+
+            # Add to executor bool for dense graph location mapping
+            location_ids_mapping.append(j['location_id'])
+
+            # Booking must happens before shipment date (deadline)
+            if j['shipment_date'] >= 0:
+                deadline_start_bound, deadline_end_bound = get_bound_of_weekday(
+                    HOURS_PER_DAY_MODEL, j['shipment_date'], 6, 18
+                )
+                model.Add(booking.end <= deadline_end_bound)
+
+            # Model variable for date change objective
+            integer_date_of_assignment_var = model.NewIntVar(
+                0, weekdays_int[-1], 'integer_date_assignment_%s_%s' % label_tuple
+            )
+            integer_dates_distance_var = model.NewIntVar(
+                -weekdays_int[-1], weekdays_int[-1], 'integer_date_distance_%s_%s' % label_tuple
+            )
+            abs_distance_var = model.NewIntVar(
+                0, weekdays_int[-1], 'integer_date_distance_abs_%s_%s' % label_tuple
+            )
+            model.AddDivisionEquality(integer_date_of_assignment_var, booking.start, HOURS_PER_DAY_MODEL)
+            model.Add(integer_date_of_assignment_var - j['expected_date'] == integer_dates_distance_var)
+            model.AddAbsEquality(abs_distance_var, integer_dates_distance_var)
+            abs_integer_dates_distance.append(abs_distance_var)
+
+            # Traveling time object avg
+            distance = get_distance_between_point(
+                distances_dict, e['employee_id'], j['location_id']
+            )
+            distance_i_to_fs += distance
+
+    avg_distance_from_i_to_fs = int(distance_i_to_fs / len(employees))
+    total_avg_distances += avg_distance_from_i_to_fs
+
+    for b in blocked_times:
+        if b['employee_id'] == e['employee_id']:
+            label_blocked = b['blocked_id']
+            booking = all_bookings[label_blocked]
+
+            # Add to list for NoOverlap constraint
+            intervals.append(booking.interval)
+
+            # Booking must happens in requested_date date
+            block_start_bound, block_end_bound = get_bound_of_weekday(
+                HOURS_PER_DAY_MODEL, b['requested_date'], 6, 18
+            )
+            model.Add(all_bookings[label_blocked].start >= block_start_bound)
+            model.Add(all_bookings[label_blocked].end <= block_end_bound)
+
+    dummy_bools = []
+    for w in weekdays_int:
+        label_dummy_day = (w, e['employee_id'], 'day')
+        booking_day = all_bookings[label_dummy_day]
+
+        label_dummy_night = (w, e['employee_id'], 'night')
+        booking_night = all_bookings[label_dummy_night]
+
+        # Add to list for NoOverlap constraint
+        intervals.append(booking_day.interval)
+        intervals.append(booking_night.interval)
+        # Add to executor node for dense graph
+        executor_intervals.append(booking_day.interval)
+        executor_intervals.append(booking_night.interval)
+
+        bool_day = model.NewBoolVar('day_dummy_%i_%s_%s' % label_dummy_day)
+        bool_night = model.NewBoolVar('night_dummy_%i_%s_%s' % label_dummy_night)
+        # Add to bools list to indicate successor of dense graph
+        dummy_bools.append(bool_day)
+        dummy_bools.append(bool_night)
+        # Add to executor bool for dense graph node reference
+        executor_bools.append(bool_day)
+        executor_bools.append(bool_night)
+        # Add to executor bool for dense graph comparing distance
+        executor_starts.append(booking_day.start)
+        executor_starts.append(booking_night.start)
+        executor_ends.append(booking_day.end)
+        executor_ends.append(booking_night.end)
+
+        location_ids_mapping.append(e['employee_id'])
+        location_ids_mapping.append(e['employee_id'])
+
+    # Enable to True all of dummy block
+    model.Add(sum(dummy_bools) == len(weekdays_int * 2))
+
+    # Non overlap all tasks
+    model.AddNoOverlap(intervals)
