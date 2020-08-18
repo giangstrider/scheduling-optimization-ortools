@@ -39,3 +39,10 @@ for b in blocked_times:
 locations_dict = {}
 for l in locations:
     locations_dict[l['factory_customer_id']] = l['employee_id']
+
+total_distance_between_matrix = 0
+distances_dict = {}
+for distance_obj in distances:
+    tuple_distance = (distance_obj["measure_point"], distance_obj["reference_point"])
+    distances_dict[tuple_distance] = distance_obj["hours"]
+    total_distance_between_matrix += distance_obj["hours"]
