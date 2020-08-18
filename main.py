@@ -145,11 +145,18 @@ max_diff_balancing_integer = len(jobs) - avg_jobs_of_employees
 max_diff_balancing_var = model.NewIntVar(0, max_diff_balancing_integer, 'max_diff_balancing')
 bools_factory_mapping = []
 for j in jobs:
-    bool_assignments = []
+    bool_jobs = []
     for e in employees:
         if j['job_type'] in e['skills'] or 'General' in e['skills']:
             label_tuple = (j['job_id'], e['employee_id'])
-            bool_assignments.append(all_bookings[label_tuple].bool_var)
+            bool_jobs.append(all_bookings[label_tuple].bool_var)
             if locations_dict[j['location_id']] == e['employee_id']:
                 bools_factory_mapping.append(all_bookings[label_tuple].bool_var.Not())
-    model.Add(sum(bool_assignments) == 1)
+    model.Add(sum(bool_jobs) == 1)
+
+    # Model load balancing objective
+    diff_var = model.NewIntVar(-avg_jobs_of_employees, max_diff_balancing_integer, 'diff_with_avg_%s' % a['job_id'])
+    model.Add(diff_var == sum(bool_jobs) - avg_jobs_of_employees)
+    abs_diff_of_balancing_var = model.NewIntVar(0, max_diff_balancing_integer, 'abs_diff_with_avg_%s' % a['job_id'])
+    model.AddAbsEquality(abs_diff_of_balancing_var, diff_var)
+    diff_of_vector_balancing.append(abs_diff_of_balancing_var)
