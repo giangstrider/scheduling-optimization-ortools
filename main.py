@@ -346,4 +346,6 @@ objectives = [
     traveling_time_objective_var,
     sum(abs_integer_dates_distance),
     max_diff_balancing_var
-]   
+]
+
+model.Minimize(sum([w * objectives[idx] for idx, w in enumerate(weights)]))
