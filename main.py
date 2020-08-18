@@ -4,7 +4,7 @@ import datetime
 import json
 import math
 
-from config import horizon, weekdays_int, HOURS_PER_DAY_MODEL
+from config import horizon, weekdays_int, HOURS_PER_DAY_MODEL, CONFIGS
 from helper import get_weekday_from_datetime, get_distance_between_point, get_bound_of_weekday
 
 with open('sample.json') as f:
@@ -326,3 +326,24 @@ for e in employees:
             ).OnlyEnforceIf(literal)
 
     model.AddCircuit(arcs)
+
+
+### OBJECTIVES ###
+# Modeling normalize traveling time
+result_traveling_time_var = model.NewIntVar(0, total_distance_between_matrix, 'result_traveling_time')
+traveling_time_objective_var = model.NewIntVar(0, total_distance_between_matrix, 'traveling_time_objective')
+model.Add(sum([
+    s * switch_transition_times[idx] for idx, s in enumerate(switch_transit_literals)
+]) == result_traveling_time_var)
+model.AddDivisionEquality(
+    traveling_time_objective_var, result_traveling_time_var, total_avg_distances
+)
+
+# MODEL MUTIPLE OBJECTS BY PRIORITY WEIGHT
+weights = [5 - val for key, val in CONFIGS.items()]
+objectives = [
+    sum(bools_location_mapping), 
+    traveling_time_objective_var,
+    sum(abs_integer_dates_distance),
+    max_diff_balancing_var
+]   
