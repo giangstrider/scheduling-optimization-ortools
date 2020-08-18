@@ -4,8 +4,8 @@ import datetime
 import json
 import math
 
-from config import horizon, weekdays_int, HOURS_PER_DAY_MODEL, CONFIGS
-from helper import get_weekday_from_datetime, get_distance_between_point, get_bound_of_weekday
+from config import horizon, weekdays_int, HOURS_PER_DAY_MODEL, CONFIGS, search_workers, log_search_progress, max_time_in_seconds
+from helper import get_weekday_from_datetime, get_distance_between_point, get_bound_of_weekday, integer_to_day_hour
 
 with open('sample.json') as f:
     data = json.load(f)
@@ -349,3 +349,46 @@ objectives = [
 ]
 
 model.Minimize(sum([w * objectives[idx] for idx, w in enumerate(weights)]))
+
+# Solve problem with model
+solver = cp_model.CpSolver()
+solver.parameters.num_search_workers = search_workers
+solver.parameters.log_search_progress = log_search_progress
+solver.parameters.max_time_in_seconds = 24 * 60 * 60
+status = solver.Solve(model)
+
+print('  - status          : %s' % solver.StatusName(status))
+print('  - conflicts       : %i' % solver.NumConflicts())
+print('  - branches        : %i' % solver.NumBranches())
+print('  - wall time       : %f s' % solver.WallTime())
+print('  - Objective       : %f s' % solver.ObjectiveValue())
+
+if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+    for e in employees:
+        print("Employee %s" % e['employee_id'])
+        for j in jobs:
+            if j['job_type'] in e['skills'] or 'General' in e['skills']:
+                label_tuple = (j['job_id'], e['employee_id'])
+                if solver.BooleanValue(all_bookings[label_tuple].bool_var):
+                    
+                    name_start = 'start_%s_%s' % (j['location_id'], j['job_id'])
+                    name_end = 'end_%s' %(j['location_id'])
+
+
+                    value_start = integer_to_day_hour(solver.Value(all_bookings[label_tuple].start), True)  + "-" + str(solver.Value(all_bookings[label_tuple].start))
+                    value_end = integer_to_day_hour(solver.Value(all_bookings[label_tuple].end), False)  + "-" + str(solver.Value(all_bookings[label_tuple].end))
+                    print(name_start + ": " + value_start)
+                    print(name_end + ": " + value_end)
+
+        for b in blocked_times:
+            if b['employee_id'] == e['employee_id']:
+                label_blocked = b['blocked_id']
+                name_start = 'start_block_%s' % label_blocked
+                name_end = 'end_block_%s' % label_blocked
+                value_start = integer_to_day_hour(solver.Value(all_bookings[label_blocked].start), True) + "-" + str(solver.Value(all_bookings[label_blocked].start))
+                value_end = integer_to_day_hour(solver.Value(all_bookings[label_blocked].end), False) + "-" + str(solver.Value(all_bookings[label_blocked].end))
+                print(name_start + ": " + value_start)
+                print(name_end + ": " + value_end)
+
+        print("")
+        print("")
