@@ -4,7 +4,7 @@ import datetime
 import json
 import math
 
-from config import horizon
+from config import horizon, weekdays_int, HOURS_PER_DAY_MODEL
 from helper import get_weekday_from_datetime, get_distance_between_point
 
 with open('sample.json') as f:
@@ -94,4 +94,44 @@ for b in blocked_times:
 
             all_bookings[label_blocked] = block_type(
                 start=start_var, end=end_var, interval=interval_var, duration=duration
-            )            
+            )
+
+# Model dummy blocks
+for w in weekdays_int:
+    for e in employees:
+        start_bound = w * HOURS_PER_DAY_MODEL
+
+        # Dummy day
+        label_dummy_day = (w, e['employee_id'], 'day')
+        end_day_from = start_bound + 6
+        start_day_var = model.NewIntVar(
+            start_bound, end_day_from, 'start_day_dummy_%i_%s_%s' % label_dummy_day
+        )
+        end_day_var = model.NewIntVar(
+            start_bound, end_day_from, 'end_day_dummy_%i_%s_%s' % label_dummy_day
+        )
+        duration_day = 6
+        day_interval_var = model.NewIntervalVar(
+            start_day_var, duration_day, end_day_var, 'interval_day_dummy_%i_%s_%s' % label_dummy_day
+        )
+        all_bookings[label_dummy_day] = dummy_type(
+            start=start_day_var, end=end_day_var, interval=day_interval_var, duration=duration_day
+        )
+
+        # Dummy night
+        label_dummy_night = (w, e['employee_id'], 'night')
+        start_night_from = start_bound + 18
+        end_night_from = (w + 1) * HOURS_PER_DAY_MODEL
+        start_night_var = model.NewIntVar(
+            start_night_from, end_night_from, 'start_night_dummy_%i_%s_%s' % label_dummy_night
+        )
+        end_night_var = model.NewIntVar(
+            start_night_from, end_night_from, 'end_night_dummy_%i_%s_%s' % label_dummy_night
+        )
+        duration_night = HOURS_PER_DAY_MODEL - 18
+        night_interval_var = model.NewIntervalVar(
+            start_night_var, duration_night, end_night_var, 'interval_night_dummy_%i_%s_%s' % label_dummy_night
+        )
+        all_bookings[label_dummy_night] = dummy_type(
+            start=start_night_var, end=end_night_var, interval=night_interval_var, duration=duration_night
+        )
