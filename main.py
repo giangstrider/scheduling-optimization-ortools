@@ -147,9 +147,9 @@ bools_factory_mapping = []
 for j in jobs:
     bool_assignments = []
     for e in employees:
-        if j['activity_type'] in e['preferred'] or 'General' in e['preferred']:
-            label_tuple = (j['assignment_id'], e['inspector_customer_id'])
+        if j['job_type'] in e['skills'] or 'General' in e['skills']:
+            label_tuple = (j['job_id'], e['employee_id'])
             bool_assignments.append(all_bookings[label_tuple].bool_var)
-            if locations_dict[j['factory_customer_id']] == e['inspector_customer_id']:
+            if locations_dict[j['location_id']] == e['employee_id']:
                 bools_factory_mapping.append(all_bookings[label_tuple].bool_var.Not())
     model.Add(sum(bool_assignments) == 1)
