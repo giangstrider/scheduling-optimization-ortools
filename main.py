@@ -135,3 +135,21 @@ for w in weekdays_int:
         all_bookings[label_dummy_night] = dummy_type(
             start=start_night_var, end=end_night_var, interval=night_interval_var, duration=duration_night
         )
+
+
+### CONSTRAINT AND OBJECTIVE FORMULATION ###
+# Each job execute by only 1 employee & load balancing | location mapping objective formulation
+diff_of_vector_balancing = []
+avg_jobs_of_employees = int(len(jobs) / len(employees))
+max_diff_balancing_integer = len(jobs) - avg_jobs_of_employees
+max_diff_balancing_var = model.NewIntVar(0, max_diff_balancing_integer, 'max_diff_balancing')
+bools_factory_mapping = []
+for j in jobs:
+    bool_assignments = []
+    for e in employees:
+        if j['activity_type'] in e['preferred'] or 'General' in e['preferred']:
+            label_tuple = (j['assignment_id'], e['inspector_customer_id'])
+            bool_assignments.append(all_bookings[label_tuple].bool_var)
+            if locations_dict[j['factory_customer_id']] == e['inspector_customer_id']:
+                bools_factory_mapping.append(all_bookings[label_tuple].bool_var.Not())
+    model.Add(sum(bool_assignments) == 1)
