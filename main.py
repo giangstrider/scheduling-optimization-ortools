@@ -284,3 +284,45 @@ for e in employees:
 
     # Non overlap all tasks
     model.AddNoOverlap(intervals)
+
+    # Model Distance and Objectives: travel time - location change
+    arcs = []
+    for idx_i, a_i in enumerate(executor_intervals):
+        # dummy node of CIRCUIT
+        start_literal = model.NewBoolVar('%i_first_job' % idx_i)
+        end_literal = model.NewBoolVar('%i_last_job' % idx_i)
+        arcs.append([0, idx_i + 1, start_literal])
+        arcs.append([idx_i + 1, 0, end_literal])
+        # Self arc if the assignment is not performed.
+        arcs.append([idx_i + 1, idx_i + 1, executor_bools[idx_i].Not()])
+        i_point = location_ids_mapping[idx_i]
+
+        for idx_j, a_j in enumerate(executor_intervals):
+            if idx_i == idx_j:
+                continue
+
+            literal = model.NewBoolVar('%i_follows_%i' % (idx_j, idx_i))
+            arcs.append([idx_i + 1, idx_j + 1, literal])
+            model.AddImplication(literal, executor_bools[idx_i])
+            model.AddImplication(literal, executor_bools[idx_j])
+
+            j_point = location_ids_mapping[idx_j]
+            # Constraint distance if j is successor of i
+            if i_point != j_point:
+                # Constraint distance location <-> location
+                i_to_j_distance = get_distance_between_point(
+                    distances_dict, i_point, j_point
+                )
+
+                # Add to objective for location change and transition times
+                switch_transit_literals.append(literal)
+                switch_transition_times.append(i_to_j_distance)
+            else:
+                i_to_j_distance = 0
+
+            # Reified transition to link the literals with the times
+            model.Add(
+                executor_starts[idx_j] >= executor_ends[idx_i] + i_to_j_distance
+            ).OnlyEnforceIf(literal)
+
+    model.AddCircuit(arcs)
